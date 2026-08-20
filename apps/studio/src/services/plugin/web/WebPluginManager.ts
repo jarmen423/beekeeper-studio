@@ -286,7 +286,7 @@ export default class WebPluginManager {
         this.pluginStore.appEventBus.emit(
           AppEvent.newCustomTab,
           this.pluginStore.buildPluginTabInit({
-            manifest,
+            manifest: snapshot.manifest,
             viewId,
             command,
             params,

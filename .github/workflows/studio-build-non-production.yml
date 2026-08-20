@@ -5,6 +5,7 @@ permissions:
   actions: write
 
 on:
+  workflow_dispatch:
   pull_request:
     paths-ignore:
       - apps/sqltools/**
@@ -30,6 +31,13 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v5
+
+      - name: Check out ai-shell-jf plugin
+        uses: actions/checkout@v5
+        with:
+          repository: jarmen423/bks-ai-shell
+          ref: devin/rename-ai-chat-plugin
+          path: bks-ai-shell
 
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
@@ -114,8 +122,13 @@ jobs:
       - name: Check dependencies
         if: steps.cache-nm.outputs.cache-hit != 'true'
         run: "yarn install --frozen-lockfile --network-timeout 100000"
-        env:
-          npm_config_node_gyp: ${{ github.workspace }}${{ runner.os == 'Windows' && '\node_modules\node-gyp\bin\node-gyp.js' || '/node_modules/node-gyp/bin/node-gyp.js' }}
+
+      - name: Build ai-shell-jf plugin
+        run: |
+          cd bks-ai-shell
+          yarn install --frozen-lockfile --network-timeout 100000
+          yarn build
+
       - name: Build Electron app
         run: "yarn run electron:build --publish never"
         if: startsWith(matrix.os, 'ubuntu') == false
