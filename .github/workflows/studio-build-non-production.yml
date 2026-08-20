@@ -5,6 +5,7 @@ permissions:
   actions: write
 
 on:
+  workflow_dispatch:
   pull_request:
     paths-ignore:
       - apps/sqltools/**
