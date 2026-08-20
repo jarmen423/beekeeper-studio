@@ -14,7 +14,7 @@ const rpmFpmOptions = [
 // FIXME: Get a new certificate with a subject line that is a valid AppX publisher
 // support request open to digicert currently (Feb 2025)
 const certSubject = 'SERIALNUMBER=803010247, C=US, ST=Texas, L=Dallas, O="Rathbone Labs, LLC", CN="Rathbone Labs, LLC"'
-const bksAiShellPath = path.dirname(require.resolve('@beekeeperstudio/bks-ai-shell/package.json'));
+const aiShellPath = path.resolve(__dirname, '../../bks-ai-shell');
 const bksErDiagramPath = path.dirname(require.resolve('@beekeeperstudio/bks-er-diagram/package.json'));
 
 
@@ -45,8 +45,9 @@ module.exports = {
   ],
   extraResources: [
     {
-      from: bksAiShellPath,
-      to: "bundled_plugins/@beekeeperstudio/bks-ai-shell"
+      from: aiShellPath,
+      to: "bundled_plugins/ai-shell-jf",
+      filter: ["dist/**/*", "manifest.json"]
     },
     {
       from: bksErDiagramPath,
