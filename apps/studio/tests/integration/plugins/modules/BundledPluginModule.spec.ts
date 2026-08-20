@@ -17,6 +17,11 @@ import {
   BundledPluginModule,
 } from "@commercial/backend/plugin-system/modules/BundledPluginModule";
 
+const aiShellFixturePath = path.join(
+  __dirname,
+  "../../../fixtures/plugins/ai-shell-jf"
+);
+
 function readJson(...paths: string[]) {
   const content = fs.readFileSync(path.join(...paths), { encoding: "utf-8" });
   return JSON.parse(content);
@@ -25,14 +30,14 @@ function readJson(...paths: string[]) {
 function installV0Plugins(fileManager: PluginFileManager) {
   const aiShellPath = path.join(
     fileManager.options.pluginsDirectory,
-    "bks-ai-shell"
+    "ai-shell-jf"
   );
   const erDiagramPath = path.join(
     fileManager.options.pluginsDirectory,
     "bks-er-diagram"
   );
   fs.cpSync(
-    BundledPlugin.resolve("@beekeeperstudio/bks-ai-shell"),
+    BundledPlugin.resolve("ai-shell-jf"),
     aiShellPath,
     { recursive: true }
   );
@@ -73,6 +78,14 @@ describe("BundledPluginModule", () => {
   }
 
   beforeAll(async () => {
+    const resolve = BundledPlugin.resolve;
+    jest.spyOn(BundledPlugin, "resolve").mockImplementation((pkg) => {
+      if (pkg === "ai-shell-jf") {
+        return aiShellFixturePath;
+      }
+      return resolve(pkg);
+    });
+
     await TestOrmConnection.connect();
     const runner = TestOrmConnection.connection.connection.createQueryRunner();
     await migration.testRun(runner);
@@ -81,6 +94,7 @@ describe("BundledPluginModule", () => {
 
   afterAll(async () => {
     await TestOrmConnection.disconnect();
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
@@ -98,8 +112,8 @@ describe("BundledPluginModule", () => {
     // Plugins are detected by a folder containing a manifest.json.
     // Here we copy from node_modules, but any source works.
     fs.cpSync(
-      BundledPlugin.resolve("@beekeeperstudio/bks-ai-shell"),
-      path.join(fileManager.options.pluginsDirectory, "bks-ai-shell"),
+      BundledPlugin.resolve("ai-shell-jf"),
+      path.join(fileManager.options.pluginsDirectory, "ai-shell-jf"),
       { recursive: true }
     );
     fs.cpSync(
@@ -113,7 +127,7 @@ describe("BundledPluginModule", () => {
     await manager.initialize();
     const plugins = await manager.getPlugins();
     expect(plugins).toHaveLength(2);
-    expect(plugins[0].manifest.id).toBe("bks-ai-shell");
+    expect(plugins[0].manifest.id).toBe("ai-shell-jf");
     expect(plugins[1].manifest.id).toBe("bks-er-diagram");
   });
 
@@ -126,11 +140,11 @@ describe("BundledPluginModule", () => {
     // Verify plugins were installed
     const plugins = await manager.getPlugins();
     expect(plugins).toHaveLength(2);
-    expect(plugins[0].manifest.id).toBe("bks-ai-shell");
+    expect(plugins[0].manifest.id).toBe("ai-shell-jf");
     expect(plugins[1].manifest.id).toBe("bks-er-diagram");
 
     // Bundled plugins should NOT be copied again after uninstall
-    await manager.uninstallPlugin("bks-ai-shell");
+    await manager.uninstallPlugin("ai-shell-jf");
     await manager.uninstallPlugin("bks-er-diagram");
     await expect(manager.getPlugins()).resolves.toHaveLength(0);
 
@@ -144,7 +158,7 @@ describe("BundledPluginModule", () => {
     installV0Plugins(fileManager);
 
     const bundledAiShell = readJson(
-      BundledPlugin.resolve("@beekeeperstudio/bks-ai-shell"),
+      BundledPlugin.resolve("ai-shell-jf"),
       "manifest.json"
     );
 

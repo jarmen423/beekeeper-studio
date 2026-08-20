@@ -1,0 +1,14 @@
+{
+  "id": "ai-shell-jf",
+  "name": "AI Shell (JF fork)",
+  "author": {
+    "name": "JF"
+  },
+  "description": "Test fixture for the forked AI Shell plugin.",
+  "version": "1.0.0",
+  "manifestVersion": 1,
+  "minAppVersion": "5.5.0",
+  "capabilities": {
+    "views": []
+  }
+}
