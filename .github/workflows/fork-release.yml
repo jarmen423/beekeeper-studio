@@ -1,0 +1,110 @@
+name: Fork - Build & Release binaries
+
+# Builds Beekeeper Studio with the forked ai-shell-jf plugin bundled and
+# publishes the installers to a GitHub Release so they can be downloaded
+# directly instead of digging through workflow artifacts.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "fork-v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, macos-14, ubuntu-22.04]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v5
+
+      - name: Check out ai-shell-jf plugin
+        uses: actions/checkout@v5
+        with:
+          repository: jarmen423/bks-ai-shell
+          ref: devin/rename-ai-chat-plugin
+          path: bks-ai-shell
+
+      - name: Install python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install fpm
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo gem install fpm -v 1.17.0
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --network-timeout 100000
+
+      - name: Build ai-shell-jf plugin
+        run: |
+          cd bks-ai-shell
+          yarn install --frozen-lockfile --network-timeout 100000
+          yarn build
+
+      - name: Build Electron app
+        run: yarn run electron:build --publish never
+        if: startsWith(matrix.os, 'ubuntu') == false
+        env:
+          USE_SYSTEM_FPM: true
+
+      - name: Build Electron app (linux)
+        run: yarn run electron:build --publish never --linux deb AppImage
+        if: startsWith(matrix.os, 'ubuntu')
+        env:
+          USE_SYSTEM_FPM: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: installers-${{ matrix.os }}
+          path: |
+            apps/studio/dist_electron/*.exe
+            apps/studio/dist_electron/*.deb
+            apps/studio/dist_electron/*.AppImage
+            apps/studio/dist_electron/*.dmg
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v7
+        with:
+          path: installers
+          merge-multiple: true
+
+      - name: List installers
+        run: ls -lhR installers
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('fork-build-{0}', github.run_number) }}
+          name: Beekeeper Studio (ai-shell-jf fork) build ${{ github.run_number }}
+          body: |
+            Beekeeper Studio built from `${{ github.sha }}` with the forked
+            `ai-shell-jf` AI chat plugin bundled and enabled by default.
+
+            After installing, open the **AI Shell (JF fork)** tab and set your
+            API key under **Providers > OpenAI Compatible**.
+          files: installers/**/*
