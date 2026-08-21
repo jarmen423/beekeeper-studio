@@ -137,7 +137,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters(["isCommunity"]),
     shouldInitialize() {
-      return !this.isCommunity && this.active && !this.initialized;
+      return this.active && !this.initialized;
     },
     isAiShellPlugin() {
       return this.tab.context.pluginId === "bks-ai-shell";
