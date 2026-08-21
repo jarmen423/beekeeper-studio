@@ -148,7 +148,7 @@ allow[] =
     const userConfig = parseIni(`
 [pluginSystem]
 allow[] = "bks-er-diagram"
-allow[] = "bks-ai-shell"
+allow[] = "ai-shell-jf"
     `);
 
     const warnings = checkUnrecognized(defaultConfig, userConfig, {}, "user");
