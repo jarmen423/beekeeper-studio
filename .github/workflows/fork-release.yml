@@ -1,8 +1,8 @@
 name: Fork - Build & Release binaries
 
 # Builds Beekeeper Studio with the forked ai-shell-jf plugin bundled and
-# publishes the installers to a GitHub Release so they can be downloaded
-# directly instead of digging through workflow artifacts.
+# publishes installers and electron-updater metadata to a GitHub Release so
+# installed builds auto-update from this repository.
 
 permissions:
   contents: write
@@ -72,6 +72,10 @@ jobs:
         env:
           USE_SYSTEM_FPM: true
 
+      - name: List Electron build outputs
+        shell: bash
+        run: ls -la apps/studio/dist_electron
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -81,12 +85,24 @@ jobs:
             apps/studio/dist_electron/*.deb
             apps/studio/dist_electron/*.AppImage
             apps/studio/dist_electron/*.dmg
+            apps/studio/dist_electron/*.yml
+            apps/studio/dist_electron/*.blockmap
+            apps/studio/dist_electron/*.zip
 
   release:
     needs: build
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v5
+
+      - name: Read app version
+        id: version
+        shell: bash
+        run: |
+          echo "version=$(node -p "require('./apps/studio/package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Download installers
         uses: actions/download-artifact@v7
         with:
@@ -99,12 +115,16 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('fork-build-{0}', github.run_number) }}
-          name: Beekeeper Studio (ai-shell-jf fork) build ${{ github.run_number }}
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', steps.version.outputs.version) }}
+          name: Beekeeper Studio (ai-shell-jf fork) v${{ steps.version.outputs.version }}
           body: |
             Beekeeper Studio built from `${{ github.sha }}` with the forked
             `ai-shell-jf` AI chat plugin bundled and enabled by default.
 
             After installing, open the **AI Shell (JF fork)** tab and set your
             API key under **Providers > OpenAI Compatible**.
+
+            Installed builds auto-update from these releases; bump `apps/studio/package.json` before each release.
           files: installers/**/*
+          make_latest: true
+          fail_on_unmatched_files: true
