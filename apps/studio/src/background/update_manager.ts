@@ -8,7 +8,7 @@ const log = rawlog.scope('update-manager')
 import platformInfo from '../common/platform_info'
 import BksConfig from '@/common/bksConfig'
 
-autoUpdater.autoDownload = false
+autoUpdater.autoDownload = true
 autoUpdater.logger = log
 
 // HACK(mc, 2019-09-10): work around https://github.com/electron-userland/electron-builder/issues/4046
