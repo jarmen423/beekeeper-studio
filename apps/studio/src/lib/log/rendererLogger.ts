@@ -20,6 +20,9 @@ log.transports.console.level = defaultLevel;
 if (log.transports.ipc) {
   log.transports.ipc.level = defaultLevel;
 }
+if (window.platformInfo?.isWeb) {
+  log.transports.ipc = (() => {}) as typeof log.transports.ipc;
+}
 
 // Tag every renderer message with processType so the console formatter
 // (`{processType}`) prints `[RENDERER]` in the terminal stream when main

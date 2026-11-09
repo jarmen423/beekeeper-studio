@@ -6,7 +6,6 @@ import { createHash } from 'crypto';
 
 export default mergeConfig(base, {
   publicDir: 'public-web',
-  resolve: { alias: { '@bksLogger': resolve('src/lib/log/browserLogger.ts') } },
   plugins: [{
     name: 'web-index',
     apply: 'build',
