@@ -11,7 +11,7 @@ export default Vue.extend({
     /* eslint-disable */
     return {
       manualNotification: new Noty({
-        text: "A new version is available. Download from our website now.",
+        text: "A new version is available on the fork's releases page.",
         layout: 'bottomRight',
         timeout: false,
         closeWith: ['button'],
@@ -26,17 +26,15 @@ export default Vue.extend({
         queue: 'download'
       }),
       downloadNotification: new Noty({
-        text: 'A new version is available. Download now?',
+        text: 'A new version is available. Downloading in the background.',
         layout: 'bottomRight',
-        timeout: false,
+        timeout: 5000,
         closeWith: ['button'],
         buttons: [
-          Noty.button('Not now', 'btn btn-flat', () => {
+          Noty.button('Dismiss', 'btn btn-flat', () => {
               // @ts-ignore
               this.downloadNotification.close();
           }),
-          // @ts-ignore
-          Noty.button('Download', 'btn btn-primary', this.triggerDownload)
         ],
         queue: 'download'
       }),
@@ -70,17 +68,13 @@ export default Vue.extend({
     closeAll() {
       Noty.closeAll('download')
     },
-    triggerDownload() {
-      window.main.triggerDownload();
-      this.downloadNotification.close()
-      this.$noty.info("Hold tight! Downloading update...")
-    },
+
     notifyManual() {
       this.closeAll()
       this.manualNotification.show()
     },
     linkToDownload() {
-      window.main.openExternally("https://beekeeperstudio.io/get");
+      window.main.openExternally("https://github.com/jarmen423/beekeeper-studio/releases");
     },
     triggerInstall() {
       window.main.triggerInstall();
