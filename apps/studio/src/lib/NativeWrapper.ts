@@ -60,6 +60,7 @@ export const ElectronPlugin: NativePlugin = {
       copyNotification.show()
     },
     readText(): string {
+      if (window.platformInfo.isWeb) return window.prompt('Paste clipboard text:') ?? '';
       return window.main.readTextFromClipboard()
     }
   },

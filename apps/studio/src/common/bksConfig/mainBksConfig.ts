@@ -141,7 +141,9 @@ export function checkDeprecations(
   return results;
 }
 
-const bundledConfigPath = path.join(process.resourcesPath);
+const bundledConfigPath = process.env.BKS_WEB_SERVER === '1'
+  ? platformInfo.resourcesPath
+  : path.join(process.resourcesPath);
 
 function copyBundledConfig(file: ConfigFileName, dest: string) {
   log.info(`Copying bundled config ${file} to ${dest}.`);

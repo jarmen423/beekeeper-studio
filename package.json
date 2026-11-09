@@ -10,6 +10,8 @@
   ],
   "scripts": {
     "bks:build": "yarn lib:build && yarn workspace beekeeper-studio electron:build",
+    "bks:web:build": "yarn lib:build && yarn workspace beekeeper-studio build:web",
+    "bks:web:serve": "yarn workspace beekeeper-studio web:serve",
     "bks:dev": "yarn lib:build && yarn workspace beekeeper-studio electron:serve",
     "bks:config:build": "yarn workspace beekeeper-studio config:build",
     "lib:dev": "yarn workspace @beekeeperstudio/ui-kit lib:dev",

@@ -2,6 +2,7 @@ import type { BksVersion } from '@/lib/license';
 import type { Platform } from '@/types';
 
 export interface IPlatformInfo {
+  isWeb?: boolean,
   isWindows: boolean,
   isMac: boolean,
   isArm: boolean,

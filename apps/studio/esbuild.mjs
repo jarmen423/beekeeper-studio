@@ -125,14 +125,24 @@ const utilityArgs = {
   plugins: [getElectronPlugin("Utility")]
 }
 
-if(isWatching) {
+const webServerArgs = {
+  ...commonArgs,
+  entryPoints: ['src-commercial/entrypoints/webServer.ts'],
+  alias: aliasFor('utilityLogger.ts'),
+}
+
+if (process.argv[2] === 'web-server') {
+  await esbuild.build(webServerArgs)
+} else if(isWatching) {
   const main = await esbuild.context(mainArgs)
   const utility = await esbuild.context(utilityArgs)
-  await Promise.all([main.watch(), utility.watch()])
+  const webServer = await esbuild.context(webServerArgs)
+  await Promise.all([main.watch(), utility.watch(), webServer.watch()])
 } else {
   await Promise.all([
     esbuild.build(mainArgs),
     esbuild.build(utilityArgs),
+    esbuild.build(webServerArgs),
   ])
 }
 // launch electron

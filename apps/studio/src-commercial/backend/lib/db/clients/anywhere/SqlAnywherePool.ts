@@ -1,4 +1,3 @@
-import sqlanywhere from 'sqlanywhere';
 import { promisify } from 'util';
 import rawLog from '@bksLogger';
 import _ from 'lodash';
@@ -13,6 +12,13 @@ export class SqlAnywhereConn {
 
   constructor(config, pool: SqlAnywherePool) {
     this.config = config;
+    let sqlanywhere;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      sqlanywhere = require('sqlanywhere');
+    } catch (error) {
+      throw new Error(`SQL Anywhere driver is unavailable. Install a native binary compatible with this application to use SQL Anywhere connections. ${error.message}`);
+    }
     this.rawConnection = sqlanywhere.createConnection();
     this.pool = pool;
   }
