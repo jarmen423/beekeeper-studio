@@ -65,4 +65,20 @@ describe('browser utility bridge', () => {
     expect(sockets).toHaveLength(3);
     bridge.stop();
   });
+  it('caps reconnect waits at two seconds and delivers the replacement port immediately on init', () => {
+    const { bridge, sockets, channels, deliver } = setup();
+    bridge.start();
+    sockets[0].onmessage({ data: encodeMessage({ type: 'init', sId: 'one' }) });
+    for (const delay of [500, 1000, 2000, 2000, 2000]) {
+      const count = sockets.length;
+      sockets[count - 1].onerror();
+      jest.advanceTimersByTime(delay - 1);
+      expect(sockets).toHaveLength(count);
+      jest.advanceTimersByTime(1);
+      expect(sockets).toHaveLength(count + 1);
+    }
+    sockets[sockets.length - 1].onmessage({ data: encodeMessage({ type: 'init', sId: 'two' }) });
+    expect(deliver).toHaveBeenLastCalledWith(channels[1].port1, 'two', true);
+    bridge.stop();
+  });
 });

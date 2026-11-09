@@ -54,7 +54,7 @@ export function createPortBridge(deliver: (port: MessagePort, sId: string, utilD
       pending.clear();
       if (!stopped) {
         timer = setTimeout(connect, delay);
-        delay = Math.min(delay * 2, 30000);
+        delay = Math.min(delay * 2, 2000);
       }
     };
   }

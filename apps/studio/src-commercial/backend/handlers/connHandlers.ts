@@ -272,7 +272,9 @@ export const ConnHandlers: IConnectionHandlers = {
   },
 
   'conn/connect': getDriverHandler('connect'),
-  'conn/disconnect': getDriverHandler('disconnect'),
+  'conn/disconnect': async function({ sId }: { sId: string }) {
+    await state(sId).connection?.disconnect();
+  },
 
   'conn/listTables': async function({ filter, sId }: { filter?: FilterOptions, sId: string }) {
     checkConnection(sId);

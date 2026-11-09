@@ -244,6 +244,6 @@ export async function startWebServer(webRoot = path.resolve(__dirname, 'web')) {
     server.listen(port, host, resolve);
   });
   const urlHost = host.includes(':') ? `[${host}]` : host;
-  console.log(`Web server: http://${urlHost}:${port}/?token=${encodeURIComponent(token)}`);
+  process.stdout.write(`Web server: http://${urlHost}:${port}/?token=${encodeURIComponent(token)}\n`);
   return { server, wss, stop };
 }
