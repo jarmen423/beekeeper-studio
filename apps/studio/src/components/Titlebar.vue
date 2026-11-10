@@ -56,7 +56,7 @@
           </button>
         </div>
         <div
-          v-if="!$config.isMac"
+          v-if="!$config.isMac && !$config.isWeb"
           class="window-controls-container"
         >
           <button

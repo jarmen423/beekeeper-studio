@@ -7,7 +7,6 @@ import { Export } from "@/lib/export";
 import ImportClass from "@/lib/import"
 import { SqlGenerator } from "@shared/lib/sql/SqlGenerator";
 import { ChildProcessWithoutNullStreams } from "child_process";
-import { MessagePortMain } from "electron";
 import { FSWatcher } from "fs";
 import fs from "fs";
 import tmp from 'tmp';
@@ -17,8 +16,15 @@ export interface TempFile {
   fileHandle: fs.promises.FileHandle
 }
 
+export interface HandlerPort {
+  postMessage(message: any): void;
+  close(): void;
+  start(): void;
+  on(event: 'message', listener: (event: { data: any }) => void): any;
+}
+
 class State {
-  port: MessagePortMain = null
+  port: HandlerPort = null
   server: IDbConnectionPublicServer = null;
   usedConfig: IConnection = null;
   connection: BasicDatabaseClient<any, any> = null;
@@ -100,4 +106,3 @@ export function checkConnection(sId: string) {
     throw new Error(errorMessages.noDatabase);
   }
 }
-

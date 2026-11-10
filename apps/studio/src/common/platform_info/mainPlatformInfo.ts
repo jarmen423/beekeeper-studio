@@ -4,6 +4,8 @@ import { existsSync } from 'fs'
 import { resolve, join } from 'path'
 import { IPlatformInfo } from '../IPlatformInfo'
 import { BksVersion } from '@/lib/license'
+import { homedir } from 'os'
+import packageInfo from '../../../package.json'
 
 
 // TODO: Automatically enable wayland without flags once
@@ -43,7 +45,7 @@ export function resolveLevel(env: any, isDev = false) {
 export function mainPlatformInfo(): IPlatformInfo {
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const e = require('electron')
+  const e = p.env.BKS_WEB_SERVER === '1' ? webRuntime() : require('electron')
   const platform = p.env.OS_OVERRIDE ? p.env.OS_OVERRIDE : p.platform
   const testMode = p.env.TEST_MODE ? true : false
   const isDevEnv = testMode ? false : !e.app.isPackaged;
@@ -63,7 +65,8 @@ export function mainPlatformInfo(): IPlatformInfo {
   // as instant client not available there
   const oracleSupported = true
 
-  const resourcesPath = isDevEnv ? resolve('./extra_resources') : resolve(p.resourcesPath)
+  const resourcesPath = isDevEnv ? resolve('./extra_resources') : resolve(p.resourcesPath ||
+    (isMac ? join(p.execPath, '..', '..', 'Resources') : join(p.execPath, '..', 'resources')))
   let userDirectory = testMode ? './tmp' : e.app.getPath("userData")
   const downloadsDirectory = testMode ? './tmp' : e.app.getPath('downloads')
   const homeDirectory = testMode ? './tmp' : e.app.getPath('home')
@@ -85,6 +88,7 @@ export function mainPlatformInfo(): IPlatformInfo {
       sessionType === 'wayland' && !isWindows && !isMac
   }
    return {
+    isWeb: p.env.BKS_WEB_SERVER === '1',
     isWindows, isMac, isArm, oracleSupported,
     parsedArgs,
     isLinux: !isWindows && !isMac,
@@ -134,3 +138,25 @@ export function mainPlatformInfo(): IPlatformInfo {
   }
 }
 
+function webRuntime() {
+  const home = homedir()
+  const configHome = process.platform === 'win32'
+    ? process.env.APPDATA || join(home, 'AppData', 'Roaming')
+    : process.platform === 'darwin'
+      ? join(home, 'Library', 'Application Support')
+      : process.env.XDG_CONFIG_HOME || join(home, '.config')
+  const paths = {
+    userData: join(configHome, packageInfo.name),
+    downloads: join(home, 'Downloads'),
+    home,
+  }
+  return {
+    app: {
+      isPackaged: !existsSync(resolve(__dirname, '..', 'default.config.ini')),
+      getLocale: () => Intl.DateTimeFormat().resolvedOptions().locale,
+      getPath: (name: keyof typeof paths) => paths[name],
+      getVersion: () => packageInfo.version,
+    },
+    nativeTheme: { shouldUseDarkColors: false },
+  }
+}

@@ -895,8 +895,8 @@ import { KeybindingPath } from '@/common/bksConfig/BksConfigProvider'
         return this.$vHotkeyKeymap({
           'queryEditor.switchPaneFocus': this.switchPaneFocus,
           'queryEditor.selectEditor': this.selectEditor,
-          'queryEditor.primaryQueryToFileAction': this.queryFunctions.primaryWrite,
-          'queryEditor.secondaryQueryToFileAction': this.queryFunctions.secondaryWrite,
+          'queryEditor.primaryQueryToFileAction': () => this.queryFunctions.primaryWrite?.(),
+          'queryEditor.secondaryQueryToFileAction': () => this.queryFunctions.secondaryWrite?.(),
           'queryEditor.manualCommit': this.manualCommit,
           'queryEditor.manualRollback': this.manualRollback,
         })
