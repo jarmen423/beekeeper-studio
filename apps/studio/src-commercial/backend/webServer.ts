@@ -137,7 +137,7 @@ export async function startWebServer(webRoot = path.resolve(__dirname, 'web')) {
         response.writeHead(405).end();
         return;
       }
-      const pathname = decodeURIComponent(url.pathname);
+      const pathname = decodeURIComponent(url.pathname).replace(/\\/g, '/');
       const candidate = path.resolve(root, '.' + pathname);
       if (!candidate.startsWith(root + path.sep) && candidate !== root) {
         response.writeHead(403).end();
